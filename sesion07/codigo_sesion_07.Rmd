@@ -1,0 +1,249 @@
+---
+title: "Aprendizaje supervisado"
+output: html_document
+date: "2025-03-07"
+---
+
+```{r}
+install.packages("readr", "dplyr", "ggplot2", "janitor", "naniar","skimr", "visdat", "GGally", "caret", "rpart", "rpart.plot")
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(janitor)
+library(naniar)
+library(skimr)
+library(visdat)
+library(GGally)
+library(caret)
+library(rpart)
+library(rpart.plot)
+```
+
+```{r}
+datos_originales <- readr::read_csv("breast_cancer_bd.csv")
+```
+
+```{r}
+datos_originales |> head()
+```
+
+```{r}
+names(datos_originales)
+```
+```{r}
+nombres_bonitos <- c("ID", "thickness", "size", "shape", "adhesion", "e_size", "b_nuclei",
+                     "chromatin", "n_nucleoli", "mitosis", "class")
+```
+
+```{r}
+names(datos_originales) <- nombres_bonitos
+```
+
+```{r}
+names(datos_originales)
+```
+
+```{r}
+head(datos_originales)
+```
+
+
+
+```{r}
+summary(datos_originales)
+```
+
+
+```{r}
+datos_originales |> nrow()
+```
+
+```{r}
+datos_originales |> ncol()
+```
+
+
+```{r}
+datos_modelacion <- datos_originales |> dplyr::select(-ID)
+```
+
+```{r}
+datos_modelacion |> head()
+```
+
+```{r}
+datos_modelacion |> dplyr::select(class) |> unique()
+```
+```{r}
+datos_modelacion <- datos_modelacion |> dplyr::mutate(class = as.factor(class),
+                                                      b_nuclei = as.numeric(b_nuclei))
+```
+
+```{r}
+datos_modelacion |> head()
+```
+
+
+```{r}
+datos_modelacion |> naniar::gg_miss_var()
+```
+
+```{r}
+datos_modelacion |> skimr::skim()
+```
+
+
+```{r}
+mi_metadata <- datos_modelacion |> skimr::skim()
+```
+
+```{r}
+datos_modelacion |> janitor::get_one_to_one()
+```
+
+```{r}
+datos_modelacion |> visdat::vis_dat()
+```
+
+```{r}
+datos_modelacion |> visdat::vis_miss()
+```
+
+```{r}
+datos_modelacion <- datos_modelacion |> tidyr::drop_na(b_nuclei)
+```
+
+```{r}
+datos_modelacion |> GGally::ggpairs()
+```
+
+ggpairs(flea, columns = 2:4, ggplot2::aes(colour = species))
+
+```{r}
+datos_modelacion |> GGally::ggpairs(columns = 1:9, ggplot2::aes(colour = class))
+```
+
+
+```{r}
+datos_modelacion |> ggplot() +
+  geom_density(aes(x = thickness, color = class)) +
+  theme_light()
+```
+
+```{r}
+datos_modelacion |> ggplot() +
+  geom_density(aes(x = thickness, fill = class), alpha = 0.3) +
+  theme_light()
+```
+
+```{r}
+datos_modelacion |> ggplot() +
+  geom_density(aes(x = size, fill = class), alpha = 0.3) +
+  theme_light()
+```
+
+```{r}
+set.seed(07032025)
+particion <- caret::createDataPartition(y = datos_modelacion$class,
+                                        p = 0.75, list = FALSE)
+```
+
+```{r}
+particion |> head(n = 10)
+```
+
+```{r}
+datos_train <- datos_modelacion[particion,]
+datos_test <- datos_modelacion[-particion,]
+```
+
+```{r}
+datos_train |> str()
+```
+
+```{r}
+datos_test |> str()
+```
+
+```{r}
+set.seed(07042025)
+modelo1 <- rpart(class ~ ., data = datos_train, method = "class")
+```
+
+```{r}
+modelo1
+```
+
+
+```{r}
+modelo1 |> rpart.plot()
+```
+
+```{r}
+set.seed(07042025)
+modelo2 <- rpart(class ~ ., data = datos_train, method = "class",
+                 control = rpart.control(minbucket = 2,
+                                         cp = 0.0005,
+                                         maxdepth = 20),
+                 parms = list(split = "gini"))
+```
+
+```{r}
+modelo2
+```
+
+
+```{r}
+modelo2 |> rpart.plot()
+```
+
+
+```{r}
+modelo2 |> plotcp()
+```
+
+```{r}
+modelo2$cptable
+```
+
+```{r}
+set.seed(07042025)
+modelo3 <- prune(modelo2, cp = modelo2$cptable[6,"CP"])
+```
+
+```{r}
+modelo3 |> rpart.plot()
+```
+
+```{r}
+prediccion_modelo1 <- predict(modelo1, newdata = datos_test, type = "class")
+prediccion_modelo2 <- predict(modelo2, newdata = datos_test, type = "class")
+prediccion_modelo3 <- predict(modelo3, newdata = datos_test, type = "class")
+```
+
+```{r}
+prediccion_modelo1 |> head()
+```
+
+$$Accuracy = \frac{bien\ clasificados}{todos}$$
+
+$$Sensibilidad = \frac{VP}{VP + FN}$$
+
+$$Especificidad = \frac{VN}{VN + FP}$$
+
+
+```{r}
+caret::confusionMatrix(prediccion_modelo1, datos_test$class, positive = "4")
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo2, datos_test$class, positive = "4")
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo3, datos_test$class, positive = "4")
+```
+
