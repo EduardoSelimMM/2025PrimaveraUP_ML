@@ -8,10 +8,10 @@
 
 ## Definición del problema y objetivos (15 puntos)
 
-(14-15 puntos): Define claramente el problema, explica su importancia y especifica objetivos medibles. Menciona stakeholders potenciales.
-(11-13 puntos): Define el problema pero carece de profundidad en los objetivos o relevancia de las stakeholders.
-(5-10 puntos): El problema está definido vagamente, los objetivos no están claros o están incompletos.
-(0-4 puntos): No hay un planteamiento claro del problema ni de los objetivos.
++ (14-15 puntos): Define claramente el problema, explica su importancia y especifica objetivos medibles. Menciona stakeholders potenciales.
++ (11-13 puntos): Define el problema pero carece de profundidad en los objetivos o relevancia de las stakeholders.
++ (5-10 puntos): El problema está definido vagamente, los objetivos no están claros o están incompletos.
++ (0-4 puntos): No hay un planteamiento claro del problema ni de los objetivos.
 
 ## Entendimiento y preprocesamiento de los datos (35 puntos)
 
