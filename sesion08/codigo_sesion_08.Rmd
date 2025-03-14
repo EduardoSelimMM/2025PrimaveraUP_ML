@@ -1,0 +1,636 @@
+---
+title: "Aprendizaje supervisado"
+author: "Eduardo Martínez"
+date: "2025-03-14"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(ggplot2)
+library(caret)
+library(e1071)
+library(ISLR)
+```
+
+# Carga de datos, limpieza y transformaciones (sesión pasada)
+
+```{r}
+datos_originales <- readr::read_csv("breast_cancer_bd.csv")
+
+nombres_bonitos <- c("ID", "thickness", "size", "shape", "adhesion", "e_size", "b_nuclei",
+                     "chromatin", "n_nucleoli", "mitosis", "class")
+
+names(datos_originales) <- nombres_bonitos
+
+datos_modelacion <- datos_originales |> dplyr::select(-ID)
+
+datos_modelacion <- datos_modelacion |> dplyr::mutate(class = as.factor(class),
+                                                      b_nuclei = as.numeric(b_nuclei))
+
+datos_modelacion <- datos_modelacion |> tidyr::drop_na(b_nuclei)
+```
+
+```{r}
+datos_modelacion |> ggplot() +
+  geom_bar(aes(x = class, y = after_stat(count), fill = class)) +
+  labs(title = "Distribución de 'class'") +
+  theme_light()
+```
+
+```{r}
+set.seed(07032025)
+particion <- caret::createDataPartition(y = datos_modelacion$class,
+                                        p = 0.75, list = FALSE)
+```
+
+```{r}
+particion |> head(n = 10)
+```
+
+```{r}
+datos_train <- datos_modelacion[particion,]
+datos_test <- datos_modelacion[-particion,]
+```
+
+```{r}
+datos_train |> str()
+```
+
+```{r}
+datos_test |> str()
+```
+
+# Árbol de decisión
+
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+```{r}
+set.seed(07042025)
+modelo1 <- rpart(class ~ ., data = datos_train, method = "class")
+```
+
+```{r}
+modelo1
+```
+
+
+```{r}
+modelo1 |> rpart.plot()
+```
+
+```{r}
+set.seed(07042025)
+modelo2 <- rpart(class ~ ., data = datos_train, method = "class",
+                 control = rpart.control(minbucket = 2,
+                                         cp = 0.0005,
+                                         maxdepth = 20),
+                 parms = list(split = "gini"))
+```
+
+```{r}
+modelo2
+```
+
+
+```{r}
+modelo2 |> rpart.plot()
+```
+
+
+```{r}
+modelo2 |> plotcp()
+```
+
+```{r}
+modelo2$cptable
+```
+
+```{r}
+set.seed(07042025)
+modelo3 <- prune(modelo2, cp = modelo2$cptable[6,"CP"])
+```
+
+```{r}
+modelo3 |> rpart.plot()
+```
+
+```{r}
+prediccion_modelo1 <- predict(modelo1, newdata = datos_test, type = "class")
+prediccion_modelo2 <- predict(modelo2, newdata = datos_test, type = "class")
+prediccion_modelo3 <- predict(modelo3, newdata = datos_test, type = "class")
+```
+
+```{r}
+prediccion_modelo1 |> head()
+```
+
+$$Accuracy = \frac{bien\ clasificados}{todos}$$
+
+$$Sensibilidad = \frac{VP}{VP + FN}$$
+
+$$Especificidad = \frac{VN}{VN + FP}$$
+
+
+```{r}
+caret::confusionMatrix(prediccion_modelo1, datos_test$class, positive = "4")
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo2, datos_test$class, positive = "4")
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo3, datos_test$class, positive = "4")
+```
+
+# Random Forest
+
+```{r}
+library(randomForest)
+```
+
+```{r}
+set.seed(14032025)
+control <- trainControl(method = "repeatedcv",
+                        number = 5,
+                        repeats = 3,
+                        sampling = "down")
+```
+
+```{r}
+control |> str()
+```
+
+```{r}
+params_rf <- data.frame(mtry = c(3,5,7))
+params_rf
+```
+
+
+
+```{r}
+modelo_rf <- train(class ~ ., data = datos_train,
+                   method = "rf",
+                   ntree = 100,
+                   importance = TRUE,
+                   trControl = control,
+                   tuneGrid = params_rf)
+```
+
+```{r}
+modelo_rf
+```
+
+```{r}
+modelo_rf |> class()
+```
+
+```{r}
+modelo_rf |> names()
+```
+
+```{r}
+modelo_rf |> str()
+```
+
+```{r}
+prediccion_modelo_rf <- predict(modelo_rf, newdata = datos_test)
+```
+
+```{r}
+prediccion_modelo_rf
+```
+```{r}
+caret::confusionMatrix(prediccion_modelo_rf, datos_test$class, positive = "4")
+```
+```{r}
+importancia_variables <- varImp(modelo_rf)
+```
+
+```{r}
+importancia_variables
+```
+
+```{r}
+plot(importancia_variables)
+```
+
+# Boosting
+
+```{r}
+library(xgboost)
+```
+
+```{r}
+set.seed(14032025)
+control <- trainControl(method = "cv",
+                        number = 5,
+                        sampling = "down")
+```
+
+```{r}
+control |> str()
+```
+
+```{r}
+params_xgBoosting <- expand.grid(max_depth = 7,
+                                 min_child_weight = 1,
+                                 gamma = 0,
+                                 nrounds = c(100,300),
+                                 eta = c(0.01, 0.1),
+                                 colsample_bytree = 0.6,
+                                 subsample = 0.6)
+```
+
+```{r}
+params_xgBoosting
+```
+```{r}
+modelo_boost <- train(class ~ ., data = datos_train,
+                      method = "xgbTree",
+                      trControl = control,
+                      tuneGrid = params_xgBoosting)
+```
+
+
+```{r}
+modelo_boost
+```
+
+```{r}
+modelo_boost |> class()
+```
+
+```{r}
+modelo_boost |> names()
+```
+
+```{r}
+modelo_boost |> str()
+```
+
+
+
+```{r}
+prediccion_modelo_boost <- predict(modelo_boost, newdata = datos_test)
+```
+
+```{r}
+prediccion_modelo_boost
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo_boost, datos_test$class, positive = "4")
+```
+
+```{r}
+importancia_variables <- varImp(modelo_boost)
+```
+
+```{r}
+importancia_variables
+```
+
+```{r}
+plot(importancia_variables)
+```
+
+# Regresión logística
+
+```{r}
+modelo_logit  <- glm(class ~ ., data = datos_train, family = binomial)
+```
+
+```{r}
+modelo_logit
+```
+
+```{r}
+modelo_logit |> class()
+```
+
+```{r}
+modelo_logit |> names()
+```
+
+```{r}
+modelo_logit |> str()
+```
+
+
+```{r}
+prediccion_modelo_logit <- predict(modelo_logit, newdata = datos_test, type = "response")
+```
+
+```{r}
+caret::confusionMatrix(prediccion_modelo_boost, datos_test$class, positive = "4")
+```
+```{r}
+tabla_importancia <- modelo_logit$coefficients |> 
+  exp()|> data.frame() |>
+  tibble::rownames_to_column(var = "variable")
+
+names(tabla_importancia)[2] <- "importancia"
+
+tabla_importancia <- tabla_importancia |> dplyr::arrange(desc(importancia))
+```
+
+```{r}
+tabla_importancia
+```
+```{r}
+tabla_importancia |> ggplot() +
+  geom_point(aes(x = importancia, y = reorder(variable, +importancia)), color = "blue") +
+  geom_segment(aes(x = 0, y = variable, xend = importancia, yend = variable)) +
+  ylab("variable") +
+  theme_light()
+```
+
+
+# Máquinas de vectores soporte
+
+```{r}
+datos <- ISLR::OJ
+```
+
+```{r}
+head(datos)
+```
+
+```{r}
+datos |> str()
+```
+
+```{r}
+datos |> ggplot() +
+  geom_bar(aes(x = Purchase, y = after_stat(count), fill = Purchase)) +
+  labs(title = "Distribución de 'Purchase'") +
+  theme_light()
+```
+
+```{r}
+set.seed(14032025)
+indices_train <- createDataPartition(y = datos$Purchase, p = 0.8, list = FALSE, times = 1)
+```
+
+```{r}
+indices_train |> tail()
+```
+```{r}
+datos_train <- datos[indices_train, ]
+datos_test <- datos[-indices_train, ]
+```
+
+```{r}
+datos_train |> str()
+```
+
+
+```{r}
+set.seed(14032025)
+svm_cv <- e1071::tune(METHOD = "svm", Purchase ~ ., data = datos_train,
+                      kernel = "linear", 
+                      ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 15, 20)),
+                      scale = TRUE)
+```
+
+```{r}
+summary(svm_cv)
+```
+```{r}
+svm_cv |> str()
+```
+
+```{r}
+svm_cv |> names()
+```
+
+```{r}
+desempenio <- svm_cv$performances
+head(desempenio)
+```
+
+
+```{r}
+ggplot(data = desempenio) +
+  geom_line(aes(x = cost, y = error)) +
+  geom_point(aes(x = cost, y = error)) +
+  labs(title = "Error de clasificación v.s. hiperparámetro C") +
+  theme_light()
+```
+
+```{r}
+svm_cv$best.parameters
+```
+
+
+```{r}
+svm_cv$best.model
+```
+
+```{r}
+mejor_modelo_svm <- svm_cv$best.model
+```
+
+```{r}
+mejor_modelo_svm |> str()
+```
+
+```{r}
+mejor_modelo_svm |> summary()
+```
+
+
+```{r}
+y_gorro <- mejor_modelo_svm$fitted
+```
+
+```{r}
+y_gorro |> tail(n = 15)
+```
+
+```{r}
+table(prediccion = y_gorro, clase_real = datos_train$Purchase)
+```
+
+```{r}
+predicciones <- predict(object = mejor_modelo_svm, newdata = datos_test)
+```
+
+```{r}
+predicciones |> str()
+```
+
+```{r}
+table(prediccion = predicciones, clase_real = datos_test$Purchase)
+```
+
+```{r}
+caret::confusionMatrix(predicciones, datos_test$Purchase, positive = "CH")
+```
+
+```{r}
+set.seed(14032025)
+svm_cv_polinomial <- tune(METHOD = "svm", Purchase ~ ., data = datos_train,
+                          kernel = "polynomial", 
+                          ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 15),
+                                        degree = c(2, 3)),
+                          scale = TRUE)
+```
+
+
+
+```{r}
+svm_cv_polinomial |> summary()
+```
+
+```{r}
+svm_cv_polinomial |> names()
+```
+
+```{r}
+desempenio <- svm_cv_polinomial$performances
+head(desempenio)
+```
+
+
+```{r}
+ggplot(data = desempenio) +
+  geom_line(aes(x = cost, y = error, color = as.factor(degree))) +
+  geom_point(aes(x = cost, y = error, color = as.factor(degree))) +
+  labs(title = "Error de clasificación v.s. hiperparámetro C") +
+  theme_light()
+```
+
+```{r}
+svm_cv_polinomial$best.parameters
+```
+
+
+```{r}
+svm_cv_polinomial$best.model
+```
+
+```{r}
+mejor_modelo_svm_polinomial <- svm_cv_polinomial$best.model
+```
+
+
+```{r}
+mejor_modelo_svm_polinomial |> summary()
+```
+
+
+```{r}
+y_gorro <- mejor_modelo_svm_polinomial$fitted
+```
+
+```{r}
+y_gorro |> tail(n = 15)
+```
+
+```{r}
+table(prediccion = y_gorro, clase_real = datos_train$Purchase)
+```
+
+```{r}
+predicciones <- predict(object = mejor_modelo_svm_polinomial, newdata = datos_test)
+```
+
+```{r}
+predicciones |> str()
+```
+
+```{r}
+table(prediccion = predicciones, clase_real = datos_test$Purchase)
+```
+
+```{r}
+caret::confusionMatrix(predicciones, datos_test$Purchase, positive = "CH")
+```
+               
+               
+```{r}
+set.seed(14032025)
+svm_cv_radial <- tune(METHOD = "svm", Purchase ~ ., data = datos_train,
+                      kernel = "radial",
+                      ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 15), 
+                                    gamma = c(0.01, 0.1, 1, 5, 10)),
+                      scale = TRUE)
+```
+
+
+
+```{r}
+svm_cv_radial |> summary()
+```
+
+```{r}
+svm_cv_radial |> names()
+```
+
+```{r}
+desempenio <- svm_cv_radial$performances
+head(desempenio)
+```
+
+
+```{r}
+ggplot(data = desempenio) +
+  geom_line(aes(x = cost, y = error, color = as.factor(gamma))) +
+  geom_point(aes(x = cost, y = error, color = as.factor(gamma))) +
+  labs(title = "Error de clasificación v.s. hiperparámetro C") +
+  theme_light()
+```
+
+```{r}
+svm_cv_radial$best.parameters
+```
+
+
+```{r}
+svm_cv_radial$best.model
+```
+
+```{r}
+mejor_modelo_svm_radial <- svm_cv_radial$best.model
+```
+
+
+```{r}
+mejor_modelo_svm_radial |> summary()
+```
+
+
+```{r}
+y_gorro <- mejor_modelo_svm_radial$fitted
+```
+
+```{r}
+y_gorro |> tail(n = 15)
+```
+
+```{r}
+table(prediccion = y_gorro, clase_real = datos_train$Purchase)
+```
+
+```{r}
+predicciones <- predict(object = mejor_modelo_svm_radial, newdata = datos_test)
+```
+
+```{r}
+predicciones |> str()
+```
+
+```{r}
+table(prediccion = predicciones, clase_real = datos_test$Purchase)
+```
+
+```{r}
+caret::confusionMatrix(predicciones, datos_test$Purchase, positive = "CH")
+```
