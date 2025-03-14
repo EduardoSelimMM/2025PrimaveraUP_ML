@@ -75,6 +75,12 @@ Este dataset tiene 16 medidas biomédicas de voz de 42 pacientes diagnosticados 
 
 Archivo: 07_parkinson.csv
 
+## Dataset 8: Ventas de Superstore
+
+Este dataset
+
+Archivo: 08_Superstore.csv
+
 # Sugerencia para la lectura de los datasets
 
 Usar
