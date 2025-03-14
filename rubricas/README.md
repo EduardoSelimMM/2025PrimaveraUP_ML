@@ -1,4 +1,4 @@
-# Rúbrica de la Segunda Evaluación Parcial
+# Rúbrica de la primera entrega de proyecto de aplicación
 
 **Formato:** Primera entrega de proyecto de aplicación
 
