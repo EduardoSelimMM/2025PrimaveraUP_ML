@@ -77,9 +77,15 @@ Archivo: 07_parkinson.csv
 
 ## Dataset 8: Ventas de Superstore
 
-Este dataset
+Este dataset ...
 
 Archivo: 08_Superstore.csv
+
+## Dataset 9: Ventas de monedas por internet
+
+Este dataset ...
+
+Archivo: 09_ventas_num_2024.csv
 
 # Sugerencia para la lectura de los datasets
 
