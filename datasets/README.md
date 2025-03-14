@@ -11,7 +11,7 @@ Este dataset se obtuvo de la NASA y consiste de diversas pruebas aerodinámicas 
 + `thickness`: Espesor de desplazamiento del lado de succión en metros
 + `sound_pressure`: (Variable respuesta) Nivel de presión del sonido en decibeles
 
-Archivo: 01airfoil.csv
+Archivo: 01_airfoil.csv
 
 ## Dataset 2: Convertidores de energía marítima 1
 
@@ -21,7 +21,23 @@ Este dataset contiene la potencia generada en dos plantas convertidores de energ
 + pais: El país en el que se encuentra la planta
 + A1,... A16: Energía absorbida por cada uno de 16 puntos
 
-Archivo: 02energy_data01.csv
+Archivo: 02_energy_data01.csv
+
+## Dataset 3: Bicicletas en Seul
+
+El datase contiene el conteo de bicicletas públicas rentadas por hora en el Seoul Bike Sharing System de Seúl.
+
+La variable respuesta de interes es `Rented Bike Count`
+
+Archivo: 03_SeoulBikeData.csv
+
+## Dataset 4: Mercado accionario de Estanbul
+
+Este data set incluye los rendimientos del mercado accionario de Estanbul (ISE). Además el data set incluye el rendimiento de otros 7 índices internacionales: SP, DAX, FTSE, NIKKEI, BOVESPA, MSCE_EU, MSCI_EM del 5 de Jun de 2009 al 22 de Febrero de 2011.
+
+La variable respuesta es ISE
+
+Archivo: 04_estanbul_data.csv
 
 ## Dataset 2: Convertidores de energía marítima 2
 
@@ -49,14 +65,6 @@ Este dataset tiene 16 medidas biomédicas de voz de 42 pacientes diagnosticados 
 
 Archivo: parkinson.csv
 
-## Dataset 5: Bicicletas en Seul
-
-El datase contiene el conteo de bicicletas públicas rentadas por hora en el Seoul Bike Sharing System de Seúl.
-
-La variable respuesta de interes es `Rented Bike Count`
-
-Archivo: SeoulBikeData.csv
-
 ## Dataset 6: Métricas en Facebook
 
 El dataset contiene información de las publicaciones en Facebook durante 2014 en la página (de FB) de una empresa de cosméticos.
@@ -66,14 +74,6 @@ Incluye 7 características que se conocen previos a la publicación del post y 1
 La variable respuesta de interés es `Lifetime Post Total Reach`
 
 Archivo: facebook_cosmetic_data.csv
-
-## Dataset 7: Mercado accionario de Estanbul
-
-Este data set incluye los rendimientos del mercado accionario de Estanbul (ISE). Además el data set incluye el rendimiento de otros 7 índices internacionales: SP, DAX, FTSE, NIKKEI, BOVESPA, MSCE_EU, MSCI_EM del 5 de Jun de 2009 al 22 de Febrero de 2011.
-
-La variable respuesta es ISE
-
-Archivo: estanbul_data.csv
 
 # Sugerencia para la lectura de los datasets
 
