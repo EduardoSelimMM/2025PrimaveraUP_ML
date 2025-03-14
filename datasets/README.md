@@ -39,7 +39,7 @@ La variable respuesta es ISE
 
 Archivo: 04_estanbul_data.csv
 
-## Dataset 2: Convertidores de energía marítima 2
+## Dataset 5: Convertidores de energía marítima 2
 
 Este dataset contiene la potencia generada en dos plantas convertidores de energía marítima en Adelaide y Tasmania (Australia).
 
@@ -47,9 +47,19 @@ Este dataset contiene la potencia generada en dos plantas convertidores de energ
 + Pais: El país en el que se encuentra la planta
 + A1,... A16: Energía absorbida por cada uno de 16 puntos
 
-Archivo: energy_data02.csv
+Archivo: 05_energy_data02.csv
 
-## Dataset 3: Dispositivo de Parkinson
+## Dataset 6: Métricas en Facebook
+
+El dataset contiene información de las publicaciones en Facebook durante 2014 en la página (de FB) de una empresa de cosméticos.
+
+Incluye 7 características que se conocen previos a la publicación del post y 12 características para evaluar el impacto de la publicación
+
+La variable respuesta de interés es `Lifetime Post Total Reach`
+
+Archivo: 06_facebook_cosmetic_data.csv
+
+## Dataset 7: Dispositivo de Parkinson
 
 Este dataset tiene 16 medidas biomédicas de voz de 42 pacientes diagnosticados con Parkinson que participaron en un estudio de 6 meses.
 
@@ -63,17 +73,7 @@ Este dataset tiene 16 medidas biomédicas de voz de 42 pacientes diagnosticados 
 
 ¿Hay diferencias en la variable respuesta que escogió entre pacientes?
 
-Archivo: parkinson.csv
-
-## Dataset 6: Métricas en Facebook
-
-El dataset contiene información de las publicaciones en Facebook durante 2014 en la página (de FB) de una empresa de cosméticos.
-
-Incluye 7 características que se conocen previos a la publicación del post y 12 características para evaluar el impacto de la publicación
-
-La variable respuesta de interés es `Lifetime Post Total Reach`
-
-Archivo: facebook_cosmetic_data.csv
+Archivo: 07_parkinson.csv
 
 # Sugerencia para la lectura de los datasets
 
@@ -81,6 +81,4 @@ Usar
 
 `read.csv("direccion_url")`
 
-donde las direcciones url son por ejemplo para los datos de las bicicletas:
-
-https://raw.githubusercontent.com/EduardoSelimMM/ProyectosRegresion/main/datasets/SeoulBikeData.csv
+donde las direcciones url son por ejemplo para los datos de las bicicletas
