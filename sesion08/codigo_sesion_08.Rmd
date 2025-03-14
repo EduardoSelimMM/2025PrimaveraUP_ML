@@ -3,7 +3,6 @@ title: "Aprendizaje supervisado"
 author: "Eduardo Martínez"
 date: "2025-03-14"
 output:
-  pdf_document: default
   html_document: default
 ---
 
