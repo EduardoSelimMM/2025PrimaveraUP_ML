@@ -1,7 +1,9 @@
 # Rúbrica de la Segunda Evaluación Parcial
 
 **Formato:** Primera entrega de proyecto de aplicación
+
 **Fecha de entrega:** A más tardar a las 18:00 hrs del 4 de abril de 2025
+
 **Fecha de presentación:** 4 de abril de 2025
 
 ## Definición del problema y objetivos (15 puntos)
