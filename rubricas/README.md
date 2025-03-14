@@ -53,6 +53,6 @@
 
 ## Entregables de la fase 1:
 
-+ Archivos de R en el que se realizó el EDA y entrenamiento de modelos
-+ Presentación PPT con descripción detallada del caso
-+ Presentación PechaKucha
++ Archivos de R en el que se realizó el EDA y entrenamiento de modelos. Recuerda que la documentación es una carta de amor a tu "yo" del futuro.
++ Presentación PPT con descripción detallada del caso.
++ Presentación PechaKucha.
