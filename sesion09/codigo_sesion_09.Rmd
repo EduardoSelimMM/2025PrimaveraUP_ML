@@ -3,7 +3,6 @@ title: "Sesion 9"
 author: "Eduardo Martínez"
 date: "2025-03-21"
 output:
-  pdf_document: default
   html_document: default
 ---
 
