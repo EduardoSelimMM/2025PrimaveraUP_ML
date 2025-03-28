@@ -812,20 +812,3 @@ by(data = datos$calificacion,
    FUN = function(x) sample(x, size = 2)
     ) |> unlist()
 ```
-
-```{r}
-library(ggplot2) # Visualizaciones
-library(ggExtra) # Visualizaciones
-library(corrplot) # Visualizaciones de la matriz de correlación
-library(dplyr) # Operaciones entre dataframes
-library(magrittr) # Algunos operadores de asignación
-library(palmerpenguins) # El dataset de los pingüinitos
-library(visdat) # Visualización de los datos faltantes
-library(skimr) # Para generer métricas
-library(janitor) # Para embellecer
-library(moments) # Calcular la kurtosis y la skewness
-library(hexbin) # Auxiliar para visualización
-```
-
-+ Vamos a hacer unas graficas sencillas
-
