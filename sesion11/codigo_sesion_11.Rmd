@@ -1,0 +1,177 @@
+---
+title: "Sesion 11"
+author: "Eduardo Martínez"
+date: "2025-04-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Análisis de Componentes Principales
+
+```{r}
+packages <- c("ggplot2",
+              "dplyr",
+              "factoextra")
+
+# Se instalan los paquetes que no se han instalado
+installed_packages <- packages %in% rownames(installed.packages())
+if(any(installed_packages == FALSE)){
+  install.packages(packages[!installed_packages])
+}
+
+# Se mandan llamar las librerías que se usarán #library(package)
+invisible(lapply(packages, library, character.only = TRUE))
+rm(list = c("packages", "installed_packages"))
+```
+
+## Los datos con los que trabajaremos
+
+```{r}
+datos <- factoextra::decathlon2
+head(datos)
+```
+
+```{r}
+datos_num <- datos |> dplyr::select(X100m:X1500m)
+head(datos_num)
+```
+
+```{r}
+datos_train <- datos_num[1:23,]
+datos_test <- datos_num[24:27,]
+```
+
+```{r}
+dim(datos_train)
+```
+```{r}
+dim(datos_test)
+```
+
+```{r}
+mi_pca <- prcomp(datos_train, scale = TRUE)
+```
+
+```{r}
+mi_pca |> str()
+```
+
+```{r}
+mi_pca |> summary()
+```
+
+```{r}
+mi_pca |> factoextra::fviz_eig()
+```
+
+```{r}
+mi_pca |> fviz_pca_ind(col.ind = "cos2",
+                       gradient.cols = c("blue", "yellow", "red"),
+                       repel = TRUE)
+```
+
+```{r}
+mi_pca |> fviz_pca_var(col.var = "contrib",
+                       gradient.cols = c("blue", "yellow", "red"),
+                       repel = TRUE)
+```
+
+```{r}
+mi_pca |> fviz_pca_biplot(repel = TRUE, col.var = "purple", col.ind = "green")
+```
+
+```{r}
+mi_pca |> factoextra::get_eigenvalue()
+```
+
+```{r}
+mi_pca |> factoextra::get_pca_var()
+```
+
+```{r}
+objetos_mi_pca <- mi_pca |> factoextra::get_pca_var()
+```
+
+```{r}
+objetos_mi_pca$coord |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$cor |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$cos2 |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$contrib |> as.data.frame()
+```
+
+```{r}
+mi_pca |> factoextra::get_pca_ind()
+```
+```{r}
+objetos_mi_pca_ind <- mi_pca |> factoextra::get_pca_ind()
+```
+
+```{r}
+objetos_mi_pca_ind$coord |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca_ind$contrib |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca_ind$cos2 |> as.data.frame()
+```
+
+```{r}
+predict(mi_pca, newdata = datos_test)
+```
+
+```{r}
+mi_pca_pred <- predict(mi_pca, newdata = datos_test)
+```
+
+
+```{r}
+graf <- fviz_pca_ind(mi_pca, repel = TRUE)
+fviz_add(graf, mi_pca_pred , color ="red")
+```
+
+```{r}
+grupos <- datos$Competition[1:23] |> as.factor()
+```
+
+```{r}
+fviz_pca_ind(mi_pca,
+             col.ind = grupos,
+             palette = c("navyblue",  "orange"),
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             legend.title = "Competencia",
+             repel = TRUE)
+```
+
+
+```{r}
+variables_calif <- datos[1:23, 11:12, drop = FALSE]
+variables_calif |> head()
+```
+
+```{r}
+coord_variables_calif <- cor(variables_calif, mi_pca$x)
+coord_variables_calif
+```
+
+```{r}
+vars_calif_cos2 <- coord_variables_calif^2
+```
+
+```{r}
+graf <- fviz_pca_var(mi_pca)
+fviz_add(graf, coord_variables_calif, color ="blue", geom="arrow")
+```
