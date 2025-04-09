@@ -1,0 +1,522 @@
+---
+title: "Sesión 12"
+author: "Eduardo Martínez"
+date: "2025-04-11"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+packages <- c("ggplot2",
+              "ggrepel",
+              "dplyr",
+              "tibble",
+              "tidyr",
+              "cluster",
+              "factoextra",
+              "palmerpenguins")
+
+# Se instalan los paquetes que no se han instalado
+installed_packages <- packages %in% rownames(installed.packages())
+if(any(installed_packages == FALSE)){
+  install.packages(packages[!installed_packages])
+}
+
+# Se mandan llamar las librerías que se usarán #library(package)
+invisible(lapply(packages, library, character.only = TRUE))
+rm(list = c("packages", "installed_packages"))
+```
+
+# Agrupamiento de crímenes de EUA
+
+```{r}
+datos <- USArrests
+head(datos)
+```
+
+```{r}
+datos_escalados <- datos |> scale() |> as.data.frame()
+datos_escalados |> head()
+```
+
+```{r}
+names(datos_escalados) <- names(datos_escalados) |> paste0("_esc")
+```
+
+```{r}
+datos_escalados |> head()
+```
+
+```{r}
+set.seed(123456)
+mi_kmeans <- kmeans(datos_escalados, centers = 4)
+```
+
+```{r}
+mi_kmeans
+```
+
+```{r}
+mi_kmeans |> str()
+```
+
+```{r}
+datos_con_cluster <- datos_escalados |>
+  dplyr::mutate(cluster = mi_kmeans$cluster) |>
+  dplyr::mutate(cluster = as.factor(cluster)) |>
+  cbind(datos)
+
+datos_con_cluster <- datos_con_cluster |> tibble::rownames_to_column(var = "estado")
+```
+
+```{r}
+head(datos_con_cluster)
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = Murder_esc, y = Assault_esc,
+                 color = cluster,
+                 size = UrbanPop)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = Murder_esc, y = Rape_esc,
+                 color = cluster,
+                 size = UrbanPop)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = Murder_esc, y = Assault_esc,
+                 color = cluster,
+                 size = UrbanPop)) +
+  geom_text_repel(aes(x = Murder_esc, y = Assault_esc,
+                 label = estado,
+                 color = cluster),
+                 size = 3) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = Murder_esc, y = Rape_esc,
+                 color = cluster,
+                 size = UrbanPop)) +
+  geom_text_repel(aes(x = Murder_esc, y = Assault_esc,
+                 label = estado,
+                 color = cluster),
+                 size = 3) +
+  theme_light()
+```
+
+```{r}
+factoextra::fviz_cluster(mi_kmeans, data = datos_escalados,
+             star.plot = TRUE,
+             repel = TRUE,
+             ggtheme = theme_light())
+```
+
+```{r}
+factoextra::fviz_nbclust(datos_escalados, kmeans, method = "wss")
+```
+
+```{r}
+set.seed(123456)
+gap_stat <- cluster::clusGap(datos_escalados, FUN = kmeans, K.max = 10)
+```
+
+```{r}
+factoextra::fviz_gap_stat(gap_stat)
+```
+
+# Pingüinos: Clustering con 4 grupos
+
+```{r}
+datos <- palmerpenguins::penguins
+datos <- datos |> tidyr::drop_na()
+```
+
+```{r}
+head(datos)
+```
+
+
+
+
+```{r}
+datos_pinguinos <- datos |> dplyr::select(bill_length_mm, bill_depth_mm,
+                                       flipper_length_mm, body_mass_g)
+
+head(datos_pinguinos)
+```
+
+
+```{r}
+datos_escalados <- datos_pinguinos |> scale() |> as.data.frame()
+names(datos_escalados) <- names(datos_escalados) |> paste0("_esc")
+datos_escalados |> head()
+```
+
+```{r}
+set.seed(123456)
+mi_kmeans <- kmeans(datos_escalados, centers = 4)
+```
+
+
+```{r}
+datos_con_cluster <- datos_escalados |>
+  dplyr::mutate(cluster = mi_kmeans$cluster) |>
+  dplyr::mutate(cluster = as.factor(cluster)) |>
+  cbind(datos)
+```
+
+```{r}
+head(datos_con_cluster)
+```
+
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = cluster)) +
+  facet_wrap(~ sex) + 
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = cluster)) +
+  facet_wrap(~ sex) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = cluster)) +
+  facet_wrap(~ sex) +
+  theme_light()
+```
+
+```{r}
+factoextra::fviz_cluster(mi_kmeans, data = datos_escalados,
+                         geom = "point",
+                         star.plot = FALSE,
+                         repel = TRUE,
+                         ggtheme = theme_light())
+```
+
+```{r}
+factoextra::fviz_nbclust(datos_escalados, kmeans, method = "wss")
+```
+
+```{r}
+set.seed(123456)
+gap_stat <- cluster::clusGap(datos_escalados, FUN = kmeans, K.max = 10)
+```
+
+```{r}
+factoextra::fviz_gap_stat(gap_stat)
+```
+
+# Pingüinos: Clustering con 5 grupos
+
+```{r}
+set.seed(123456)
+mi_kmeans <- kmeans(datos_escalados, centers = 5)
+```
+
+```{r}
+datos_con_cluster <- datos_escalados |>
+  dplyr::mutate(cluster = mi_kmeans$cluster) |>
+  dplyr::mutate(cluster = as.factor(cluster)) |>
+  cbind(datos)
+```
+
+```{r}
+head(datos_con_cluster)
+```
+
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = cluster)) +
+  facet_wrap(~ sex) + 
+  theme_light()
+```
+
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = cluster)) +
+  facet_wrap(~ sex) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = cluster)) +
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = cluster)) +
+  facet_wrap(~ sex) +
+  theme_light()
+```
+
+```{r}
+factoextra::fviz_cluster(mi_kmeans, data = datos_escalados,
+                         geom = "point",
+                         star.plot = FALSE,
+                         repel = TRUE,
+                         ggtheme = theme_light())
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = cluster)) +
+  facet_wrap(species ~ island) + 
+  theme_light()
+```
+
+```{r}
+datos |> ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+                 color = island)) +
+  facet_wrap(~ species) + 
+  theme_light()
+```
+
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = cluster)) +
+  facet_wrap(species ~ island) +
+  theme_light()
+```
+
+```{r}
+datos |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = body_mass_g,
+                 color = island)) +
+  facet_wrap(~ species) + 
+  theme_light()
+```
+
+```{r}
+datos_con_cluster |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = cluster)) +
+  facet_wrap(species ~ island) +
+  theme_light()
+```
+
+```{r}
+datos |> ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_length_mm,
+                 color = island)) +
+  facet_wrap(~ species) + 
+  theme_light()
+```
+
+# Análisis de Componentes Principales
+
+## Los datos con los que trabajaremos
+
+```{r}
+datos <- factoextra::decathlon2
+head(datos)
+```
+
+```{r}
+datos_num <- datos |> dplyr::select(X100m:X1500m)
+head(datos_num)
+```
+
+```{r}
+datos_train <- datos_num[1:23,]
+datos_test <- datos_num[24:27,]
+```
+
+```{r}
+dim(datos_train)
+```
+```{r}
+dim(datos_test)
+```
+
+```{r}
+mi_pca <- prcomp(datos_train, scale = TRUE)
+```
+
+```{r}
+mi_pca |> str()
+```
+
+```{r}
+mi_pca |> summary()
+```
+
+```{r}
+mi_pca |> factoextra::fviz_eig()
+```
+
+```{r}
+mi_pca |> fviz_pca_ind(col.ind = "cos2",
+                       gradient.cols = c("blue", "yellow", "red"),
+                       repel = TRUE)
+```
+
+```{r}
+mi_pca |> fviz_pca_var(col.var = "contrib",
+                       gradient.cols = c("blue", "yellow", "red"),
+                       repel = TRUE)
+```
+
+```{r}
+mi_pca |> fviz_pca_biplot(repel = TRUE, col.var = "purple", col.ind = "green")
+```
+
+```{r}
+mi_pca |> factoextra::get_eigenvalue()
+```
+
+```{r}
+mi_pca |> factoextra::get_pca_var()
+```
+
+```{r}
+objetos_mi_pca <- mi_pca |> factoextra::get_pca_var()
+```
+
+```{r}
+objetos_mi_pca$coord |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$cor |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$cos2 |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca$contrib |> as.data.frame()
+```
+
+```{r}
+mi_pca |> factoextra::get_pca_ind()
+```
+```{r}
+objetos_mi_pca_ind <- mi_pca |> factoextra::get_pca_ind()
+```
+
+```{r}
+objetos_mi_pca_ind$coord |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca_ind$contrib |> as.data.frame()
+```
+
+```{r}
+objetos_mi_pca_ind$cos2 |> as.data.frame()
+```
+
+```{r}
+predict(mi_pca, newdata = datos_test)
+```
+
+```{r}
+mi_pca_pred <- predict(mi_pca, newdata = datos_test)
+```
+
+
+```{r}
+graf <- fviz_pca_ind(mi_pca, repel = TRUE)
+fviz_add(graf, mi_pca_pred , color ="red")
+```
+
+```{r}
+grupos <- datos$Competition[1:23] |> as.factor()
+```
+
+```{r}
+fviz_pca_ind(mi_pca,
+             col.ind = grupos,
+             palette = c("navyblue",  "orange"),
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             legend.title = "Competencia",
+             repel = TRUE)
+```
+
+
+```{r}
+variables_calif <- datos[1:23, 11:12, drop = FALSE]
+variables_calif |> head()
+```
+
+```{r}
+coord_variables_calif <- cor(variables_calif, mi_pca$x)
+coord_variables_calif
+```
+
+```{r}
+vars_calif_cos2 <- coord_variables_calif^2
+```
+
+```{r}
+graf <- fviz_pca_var(mi_pca)
+fviz_add(graf, coord_variables_calif, color ="blue", geom="arrow")
+```
