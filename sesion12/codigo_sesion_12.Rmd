@@ -1,9 +1,7 @@
 ---
 title: "Sesión 12"
-author: "Eduardo Martínez"
 date: "2025-04-11"
 output:
-  pdf_document: default
   html_document: default
 ---
 
