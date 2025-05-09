@@ -1,9 +1,8 @@
 ---
 title: "Sesion 13"
-author: "Eduardo Martínez"
-date: "2025-05-02"
+author: "Estudiante"
+date: "2025-05-09"
 output:
-  pdf_document: default
   html_document: default
 ---
 
