@@ -1,0 +1,218 @@
+---
+title: "Sesion 13"
+author: "Eduardo Martínez"
+date: "2025-05-02"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+packages <- c("ggplot2",
+              "rsample",
+              "dplyr",
+              "caret",
+              "neuralnet",
+              "Metrics",
+              "AmesHousing")
+
+# Se instalan los paquetes que no se han instalado
+installed_packages <- packages %in% rownames(installed.packages())
+if(any(installed_packages == FALSE)){
+  install.packages(packages[!installed_packages])
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+# Se mandan llamar las librerías que se usarán #library(package)
+invisible(lapply(packages, library, character.only = TRUE))
+rm(list = c("packages", "installed_packages"))
+```
+
+# Ejemplo de juguete
+
+```{r}
+# Generaremos datos simulados
+set.seed(02052025)
+datos <- data.frame(
+  x1 = rnorm(100),
+  x2 = rnorm(100),
+  clase = factor(sample(0:1, 100, replace = TRUE))
+)
+```
+
+```{r}
+datos |> head()
+```
+
+```{r}
+datos |> ggplot() +
+  geom_point(aes(x = x1, y = x2, color = clase)) +
+  theme_light()
+```
+
+
+```{r}
+set.seed(02052005)
+split_datos <- rsample::initial_split(datos, prop = .7)
+datos_train <- rsample::training(split_datos)
+datos_test  <- rsample::testing(split_datos)
+```
+
+```{r}
+# Se define y entrena la red neuronal
+modelo_red_neuronal <- neuralnet(clase ~ x1 + x2, data = datos_train,
+                                 hidden = 5)
+```
+
+```{r}
+modelo_red_neuronal |> class()
+```
+
+```{r}
+plot(modelo_red_neuronal, rep="best")
+```
+
+
+# Los datos con los que trabajaremos
+
+```
+help(ames_raw)
+```
+
+```{r}
+set.seed(123456)
+datos <- AmesHousing::make_ames()
+datos |> head()
+```
+
+```{r}
+datos_modelo <- datos |> dplyr::select(Sale_Price, Wood_Deck_SF,
+                                       Open_Porch_SF, Garage_Area)
+
+datos_modelo |> head()
+```
+
+```{r}
+preproc <- preProcess(datos_modelo, method=c("range"))
+datos_modelo <- predict(preproc, datos_modelo)
+```
+
+```{r}
+head(datos_modelo)
+```
+
+
+```{r}
+set.seed(02052005)
+split_datos <- rsample::initial_split(datos_modelo, prop = .7)
+datos_train <- rsample::training(split_datos)
+datos_test  <- rsample::testing(split_datos)
+```
+
+## Primer modelo
+
+```{r}
+modelo_rn <- neuralnet(Sale_Price ~ Wood_Deck_SF + Open_Porch_SF + Garage_Area,
+                       data = datos_train,
+                       hidden = 3,
+                       linear.output = TRUE)
+```
+
+```{r}
+modelo_rn |> class()
+```
+
+```{r}
+modelo_rn$result.matrix
+```
+
+```{r}
+plot(modelo_rn, rep="best")
+```
+
+```{r}
+datos_train <- datos_train |> dplyr::mutate(prediccion = modelo_rn$response)
+predicciones_rn <- predict(modelo_rn, newdata = datos_test)
+datos_test <- datos_test |> dplyr::mutate(prediccion = predicciones_rn)
+```
+
+```{r}
+datos_test |> head()
+```
+
+```{r}
+datos_test |> head()
+```
+
+```{r}
+datos_train |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
+
+```{r}
+datos_test |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
+
+## Otra aquitectura
+
+```{r}
+modelo_rn <- neuralnet(Sale_Price ~ Wood_Deck_SF + Open_Porch_SF + Garage_Area,
+                       data = datos_train,
+                       hidden = c(2,1))
+```
+
+```{r}
+plot(modelo_rn, rep="best")
+```
+
+```{r}
+datos_train <- datos_train |> dplyr::mutate(prediccion = modelo_rn$response)
+predicciones_rn <- predict(modelo_rn, newdata = datos_test)
+datos_test <- datos_test |> dplyr::mutate(prediccion = predicciones_rn)
+```
+
+```{r}
+datos_train |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
+
+```{r}
+datos_test |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
+
+## Otra aquitectura
+
+```{r}
+modelo_rn <- neuralnet(Sale_Price ~ Wood_Deck_SF + Open_Porch_SF + Garage_Area,
+                       data = datos_train,
+                       hidden = c(2,2))
+```
+
+```{r}
+plot(modelo_rn, rep="best")
+```
+
+```{r}
+datos_train <- datos_train |> dplyr::mutate(prediccion = modelo_rn$response)
+predicciones_rn <- predict(modelo_rn, newdata = datos_test)
+datos_test <- datos_test |> dplyr::mutate(prediccion = predicciones_rn)
+```
+
+```{r}
+datos_train |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
+
+```{r}
+datos_test |> ggplot() +
+  geom_point(aes(x = Sale_Price, y = prediccion)) +
+  theme_light()
+```
