@@ -6,6 +6,7 @@
 - [Sesion 10: 28 de marzo de 2025](./sesion10)
 - [Sesion 11: 4 de abril de 2025](./sesion11)
 - [Sesion 12: 11 de abril de 2025](./sesion12)
+- [Sesion 13: 9 de mayo de 2025](./sesion13)
 
 ## Equipos
 
