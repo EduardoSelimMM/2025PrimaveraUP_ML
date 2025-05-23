@@ -4,11 +4,25 @@ date: "2025-05-23"
 output: html_document
 ---
 
-## Introducción a la limpieza de texto
-
 ```{r}
-library(stringr)
+packages <- c("stringr",
+              "quanteda",
+              "quanteda.textplots")
+
+# Se instalan los paquetes que no se han instalado
+installed_packages <- packages %in% rownames(installed.packages())
+if(any(installed_packages == FALSE)){
+  install.packages(packages[!installed_packages])
+}
 ```
+
+```{r message=FALSE, warning=FALSE}
+# Se mandan llamar las librerías que se usarán #library(package)
+invisible(lapply(packages, library, character.only = TRUE))
+rm(list = c("packages", "installed_packages"))
+```
+
+## Introducción a la limpieza de texto
 
 + Limpieza de texto es analizar y limpiar datos en forma de string
 
